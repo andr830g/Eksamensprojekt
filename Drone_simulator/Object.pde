@@ -40,12 +40,12 @@ class Object {
     obsh = h;
     fill(155,155,155,100);
     noStroke();
-    translate(-x+drone.x,-y+drone.y,-drone.z+h/2);
+    translate(-obsx+drone.x,-obsy+drone.y,-drone.z+obsh/2);
     beginShape();
     shininess(0.5);
-    box(l,w,h);
+    box(obsl,obsw,obsh);
     endShape();
-    translate(x-drone.x,y-drone.y,drone.z-h/2);
+    translate(obsx-drone.x,obsy-drone.y,drone.z-obsh/2);
   }
   
   

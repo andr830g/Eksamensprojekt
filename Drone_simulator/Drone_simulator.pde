@@ -8,6 +8,10 @@ Eksamensprojekt
 
 import peasy.*;
 
+float cameraangle = PI/2-PI/8;
+
+
+//Global variables DO NOT TOUCH!
 PeasyCam cam;
 
 Drone drone = new Drone();
@@ -15,13 +19,14 @@ Object[] object = new Object[5];
 Programming programming = new Programming();
 Block[] block = new Block[100];
 
-float cameraangle = PI/2-PI/8;
 float cameradrag = 0;
 boolean programmingb = true;
 float programming_movex;
 
 int numofchosenblocks = 0;
 int blockpressed = 0;
+
+boolean colision = false;
 
 
 void setup() {
@@ -50,7 +55,7 @@ void setup() {
   
   cam = new PeasyCam(this,width/2-programming_movex,height/2,(height/2)/tan(PI/6),50); //Note with PeasyCam the camera orientation can be moved and you can zoom in and out.
   cam.setSuppressRollRotationMode(); //Camera can only be Yawed and Pitched for a more controlled camera movement.
-  cam.setMinimumDistance(50);
+  cam.setMinimumDistance(0);
   cam.setMaximumDistance(2000);
 }
 
@@ -67,9 +72,10 @@ void draw() {
   drone.info();
   if (programmingb == true) {
     programming.display();
-    programming.choose(); 
   }
   cam.endHUD();
+  
+  programming.perform(); 
   
   drone.move();
   drone.colision();
@@ -107,7 +113,7 @@ void landscape() {
 Checking if any keys for movement are pressed, if yes then the movement is set true.
 **************************************************************************************************************************************************/
 void keyPressed() {
-  if (programming.perform == false) {
+  if (programming.perform == false && colision == false) {
     //moving drone freely
     if (key == 'a') {
       drone.keyA = true;
@@ -216,7 +222,7 @@ Allowing the user to get a 360 degree view of the drone.
 void mouseDragged() {
   if (mouseY >= height/2) {
     cam.setActive(false);
-    cameradrag+=2*PI*(mouseX-pmouseX)/360;
+    cameradrag+=radians(mouseX-pmouseX);
   }
   else {
     cam.setActive(true);

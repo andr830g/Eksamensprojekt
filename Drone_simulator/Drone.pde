@@ -38,7 +38,7 @@ class Drone {
     
     rotationZ = 0;
     rotationX = 0;
-    tiltspeed = 2*(2*PI/360);
+    tiltspeed = 2*radians(1);
     tiltangle = PI/6;
     
     scale = 2;
@@ -168,26 +168,37 @@ class Drone {
     float textsize = 20;
     fill(255,255,255,100);
     textSize(textsize);
-    text("Altitude: "+nf(abs((z-scale*drone.height)/meter),2,1)+"m",textx,texty+2*textsize);
-    text("X-Coordinate: "+nf(x/meter,4,1),textx,texty+3*textsize);
-    text("Y-Coordinate: "+nf(y/meter,4,1),textx,texty+4*textsize);
-    text("Orientation: "+nf(abs(degrees(theta))%360,3,1),textx,texty+5*textsize);
+    text("Altitude: "+nf(abs((z-scale*drone.height)/meter),3,2)+"m",textx,texty+2*textsize);
+    text("X-Coordinate: "+nf(x/meter,3,2),textx,texty+3*textsize);
+    text("Y-Coordinate: "+nf(y/meter,3,2),textx,texty+4*textsize);
+    text("Orientation: "+nf(abs(degrees(theta))%360,3,2),textx,texty+5*textsize);
     text("Horizontal Speed: "+(hspeed*60/meter)+"m/s",textx,texty+6*textsize);
     text("Vertical Speed: "+(vspeed*60/meter)+"m/s",textx,texty+7*textsize);
   }
   
+  
+  /**************************************************************************************************************************************************
+  Checking for colision between drone and objects.
+  If colision is true all movements will be set false and performColision() in Programming class will be initiated
+  **************************************************************************************************************************************************/
   void colision() {
     for (int i = 2; i < object.length; i++) {
       float a = object[i].obsl/2+scale*drone.width/2;
       float b = object[i].obsw/2+scale*drone.width/2;
       
-      if (x <= object[i].obsx+a && x >= object[i].obsx-a && y <= object[i].obsy+b && y >= object[i].obsy-b && z <= object[i].obsh/2+scale*drone.height) {
-        //println("COLISION");
+      if (x <= object[i].obsx+a && x >= object[i].obsx-a && y <= object[i].obsy+b && y >= object[i].obsy-b && z <= object[i].obsh/2+scale*drone.height) { //Yes colision
+        colision = true;
+        keyW = false;
+        keyS = false;
+        keyA = false;
+        keyD = false;
+        keyUp = false;
+        keyDown = false;
+        keyLeft = false;
+        keyRight = false;
       }
-      else {
-        //println("NO");
+      else { //NO colision
       }
     }
-    //println(" ");
   }
 }

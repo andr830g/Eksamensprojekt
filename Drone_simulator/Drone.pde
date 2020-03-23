@@ -12,6 +12,9 @@ class Drone {
   float hspeed;
   float vspeed;
   float thetaspeed;
+  float hSpeedParameter;
+  float vSpeedParameter;
+  float thetaSpeedParameter;
   
   float rotationZ;
   float rotationX;
@@ -40,6 +43,10 @@ class Drone {
     rotationX = 0;
     tiltspeed = 2*radians(1);
     tiltangle = PI/6;
+    
+    hSpeedParameter = 2;
+    vSpeedParameter = 1;
+    thetaSpeedParameter = 1;
     
     scale = 2;
   }
@@ -86,9 +93,9 @@ class Drone {
   If any movement is true then the drone is tilted and the x,y,z coordinates of the drone are changes.
   **************************************************************************************************************************************************/
   void move() {
-    hspeed = 2*meter/60;
-    vspeed = meter/60;
-    thetaspeed = 2*PI/360; //(2*PI/6)/60
+    hspeed = hSpeedParameter*meter/60;
+    vspeed = vSpeedParameter*meter/60;
+    thetaspeed = thetaSpeedParameter*radians(1);
     
     //Left
     if (keyA == true) { //a 65
@@ -168,12 +175,13 @@ class Drone {
     float textsize = 20;
     fill(255,255,255,100);
     textSize(textsize);
-    text("Altitude: "+nf(abs((z-scale*drone.height)/meter),3,2)+"m",textx,texty+2*textsize);
-    text("X-Coordinate: "+nf(x/meter,3,2),textx,texty+3*textsize);
-    text("Y-Coordinate: "+nf(y/meter,3,2),textx,texty+4*textsize);
-    text("Orientation: "+nf(abs(degrees(theta))%360,3,2),textx,texty+5*textsize);
+    text("Altitude: "+nf(abs((z-scale*drone.height)/meter),1,1)+"m",textx,texty+2*textsize);
+    text("X-Coordinate: "+nf(x/meter,1,1),textx,texty+3*textsize);
+    text("Y-Coordinate: "+nf(y/meter,1,1),textx,texty+4*textsize);
+    text("Orientation: "+nf(abs(degrees(theta))%360,1,1),textx,texty+5*textsize);
     text("Horizontal Speed: "+(hspeed*60/meter)+"m/s",textx,texty+6*textsize);
     text("Vertical Speed: "+(vspeed*60/meter)+"m/s",textx,texty+7*textsize);
+    text("Theta Speed: "+(thetaspeed/radians(1))+"rad/s",textx,texty+8*textsize);
   }
   
   
@@ -188,17 +196,43 @@ class Drone {
       
       if (x <= object[i].obsx+a && x >= object[i].obsx-a && y <= object[i].obsy+b && y >= object[i].obsy-b && z <= object[i].obsh/2+scale*drone.height) { //Yes colision
         colision = true;
-        keyW = false;
-        keyS = false;
-        keyA = false;
-        keyD = false;
-        keyUp = false;
-        keyDown = false;
-        keyLeft = false;
-        keyRight = false;
+        for (int j = 0; j < 8; j++) {
+          keyState(j,false);
+        }
       }
       else { //NO colision
       }
+    }
+  }
+  
+  
+  /**************************************************************************************************************************************************
+  Changing the state of a specific key
+  **************************************************************************************************************************************************/
+  void keyState(int i, boolean state) {
+    if (i == 0) {
+      keyW = state;
+    }
+    else if (i == 1) {
+      keyS = state;
+    }
+    else if (i == 2) {
+      keyA = state;
+    }
+    else if (i == 3) {
+      keyD = state;
+    }
+    else if (i == 4) {
+      keyUp = state;
+    }
+    else if (i == 5) {
+      keyDown = state;
+    }
+    else if (i == 6) {
+      keyLeft = state;
+    }
+    else if (i == 7) {
+      keyRight = state;
     }
   }
 }

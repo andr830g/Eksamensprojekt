@@ -191,12 +191,12 @@ The value is from 0 to the number of blocks to choose from.
 **************************************************************************************************************************************************/
 void mouseClicked() {
   //Adding blocks
+  int nextblock = numofchosenblocks+programming.indexblock.length;
   for (int i = 0; i < programming.indexblock.length; i++) {
-    float a = (1+2*i)*(programming.spacechoose+programming.rchoose);
-    if (sq(programming.xchoose-mouseX)+sq(a-mouseY) <= sq(programming.rchoose) && programming.perform == false) { //Checking if the cursor is in the indexblock
-      block[numofchosenblocks].indextext = i; //Determining which action it has to perform
+    if (mouseX <= block[i].len && mouseY >= block[i].y-0.5*block[i].wid && mouseY <= block[i].y+0.5*block[i].wid) {
+      block[nextblock].indextext = i; //Determining which action it has to perform
+      blockpressed = nextblock;
       numofchosenblocks++;
-      blockpressed = -1+numofchosenblocks;
     }
   }
   
@@ -205,10 +205,15 @@ void mouseClicked() {
     programming.perform = true;
   }
   
-  //Clicking on a block from 0 to the number of chosen blocks
-  for (int i = 0; i < numofchosenblocks; i++) {
-    if (mouseX >= block[i].x-1.5*block[i].len && mouseX <= block[i].x+1.5*block[i].len) { //Checking if the cursor is within the x-range of the chosen programming blocks.
-      if (mouseY >= block[i].y-0.5*block[i].len && mouseY <= block[i].y+0.5*block[i].len) { //Checking if the cursor is within the y-range of the cohosen programming blocks.
+  //Clicking STOP
+  if (sq(programming.xstop-mouseX)+sq(programming.ystop-mouseY) <= sq(programming.rstop)) {
+    programming.currentblock = numofchosenblocks+programming.indexblock.length;
+  }
+  
+  //Clicking on a chosen block from the number 0'th to the number of chosen blocks
+  for (int i = programming.indexblock.length; i < numofchosenblocks+programming.indexblock.length; i++) {
+    if (mouseX >= block[i].x-0.5*block[i].len && mouseX <= block[i].x+0.5*block[i].len) { //Checking if the cursor is within the x-range of the chosen programming blocks.
+      if (mouseY >= block[i].y-0.5*block[i].wid && mouseY <= block[i].y+0.5*block[i].wid) { //Checking if the cursor is within the y-range of the cohosen programming blocks.
         blockpressed = i;
       }
     }

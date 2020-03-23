@@ -5,14 +5,14 @@ class Programming {
   boolean perform;
   int currentblock;
   
-  float xchoose;
-  float rchoose;
-  float spacechoose;
-  String[] indexblock = {"FORWARD","BACKWARD","LEFT","RIGHT","UP","DOWN","YAW LEFT","YAW RIGHT","REPEAT"};
+  String[] indexblock = {"FORWARD","BACKWARD","LEFT","RIGHT","UP","DOWN","YAW LEFT","YAW RIGHT","REPEAT","HSPEED","VSPEED","THETASPEED"};
   
   float rgo;
   float xgo;
   float ygo;
+  float rstop;
+  float xstop;
+  float ystop;
   
   int repeatindex;
   int repeattimesindex;
@@ -25,7 +25,7 @@ class Programming {
     setTarget = true;
     thetatarget = drone.theta;
     perform = false;
-    currentblock = 0;
+    currentblock = indexblock.length;
     
     repeatindex = 1;
     repeattimesindex = 1;
@@ -35,8 +35,9 @@ class Programming {
   
   /**************************************************************************************************************************************************
   Creating a black surface with the purpose of being a programming workspace.
-  Creating static programming blocks from the block function.
   Creating a go button to start the program.
+  Creating a stop button to stop the program.
+  Showing the array of the index blocks.
   Showing the array of chosen programming blocks.
   **************************************************************************************************************************************************/
   void display() {
@@ -44,23 +45,23 @@ class Programming {
     noStroke();
     rect(programming_movex,height/2,2*programming_movex,height);
     
-    //Displaying the index blocks
-    rchoose = (height*4/(indexblock.length*10)); //(height/8)*(4/10)
-    spacechoose = (height/(indexblock.length*10)); //(height/8)*(1/10)
-    xchoose = 60;
-    for (int i = 0; i < indexblock.length; i++) {
-      float ychoose = (1+2*i)*(spacechoose+rchoose);
-      blockDisplay("index",xchoose,ychoose,rchoose,rchoose,true,color(155,155,155,100),false,color(0),indexblock[i],color(255,255,255,100),xchoose,ychoose,16);
-    }
-    
-    //Displaying the GO button
+    //Displaying the GO button and the STOP button
     rgo = 50;
     xgo = 2*programming_movex-rgo-10;
     ygo = rgo+10;
-    blockDisplay("index",xgo,ygo,rgo,rgo,false,color(0,0,0),true,color(0,255,0,100),"GO",color(0,0,0,100),xgo,ygo,40);
+    blockDisplay("GO",xgo,ygo,rgo,rgo,false,color(0,0,0),true,color(0,255,0,100),"GO",color(0,0,0,100),40);
+    
+    rstop = rgo;
+    xstop = xgo;
+    ystop = ygo+2.5*rgo;
+    blockDisplay("STOP",xstop,ystop,rstop,rstop,false,color(0,0,0),true,color(255,0,0,100),"STOP",color(0,0,0,100),40);
+    
+    for (int i = 0; i < indexblock.length; i++) {
+      block[i].displayIndex(i);
+    }
     
     //Displaying the chosen programming blocks
-    for(int i = 0; i < numofchosenblocks; i++) {
+    for(int i = indexblock.length; i < numofchosenblocks+indexblock.length; i++) {
       block[i].displayChosen(i);
     }
   }
@@ -72,16 +73,17 @@ class Programming {
   **************************************************************************************************************************************************/
   void perform() {
     if (perform == true) { //Performing the programming blocks
-      if (currentblock < numofchosenblocks) {
+      if (currentblock < numofchosenblocks+indexblock.length) {
         performProgramming(currentblock,false);
       }
       else { //reseting the programming blocks.
         perform = false;
-        currentblock = 0;
+        currentblock = indexblock.length;
         numofchosenblocks = 0;
+        setTarget = true;
         setRepeat = true;
         
-        for (int i = 0; i < block.length; i++) {
+        for (int i = indexblock.length; i < block.length; i++) {
           block[i] = new Block();
         }
       }
@@ -96,32 +98,20 @@ class Programming {
   The value at the i'th place in the programming array is determining which action tp perform.
   **************************************************************************************************************************************************/
   void performProgramming(int i, boolean repeat) {
-    if (indexblock[block[i].indextext] == "FORWARD") { //0
-      blockW(block[i].value,repeat);
+    if (block[i].indextext <= 7) {
+      block(block[i].indextext,block[i].value,repeat);
     }
-    else if (indexblock[block[i].indextext] == "BACKWARD") { //1
-      blockS(block[i].value,repeat);
-    }
-    else if (indexblock[block[i].indextext] == "LEFT") { //2
-      blockA(block[i].value,repeat);
-    }
-    else if (indexblock[block[i].indextext] == "RIGHT") { //3
-      blockD(block[i].value,repeat);
-    }
-    else if (indexblock[block[i].indextext] == "UP") { //4
-      blockUp(block[i].value,repeat);
-    }
-    else if (indexblock[block[i].indextext] == "DOWN") { //5
-      blockDown(block[i].value,repeat);
-    }
-    else if (indexblock[block[i].indextext] == "YAW LEFT") { //6
-      blockYl(block[i].value,repeat);
-    }
-    else if (indexblock[block[i].indextext] == "YAW RIGHT") { //7
-      blockYr(block[i].value,repeat);
-    }
-    else if (indexblock[block[i].indextext] == "REPEAT") { //8
+    else if (indexblock[block[i].indextext] == "REPEAT") {
       blockRepeat(block[i].repeatTimes,block[i].repeatBlocks,i);
+    }
+    else if (indexblock[block[i].indextext] == "HSPEED") {
+      blockHSpeed(block[i].value,repeat);
+    }
+    else if (indexblock[block[i].indextext] == "VSPEED") {
+      blockVSpeed(block[i].value,repeat);
+    }
+    else if (indexblock[block[i].indextext] == "THETASPEED") {
+      blockThetaSpeed(block[i].value,repeat);
     }
   }
   
@@ -131,45 +121,46 @@ class Programming {
   **************************************************************************************************************************************************/
   void performColision() {
     //Rotating the drone to theta = 0
+    int start = indexblock.length;
     if (drone.theta < 0) {
-      block[0].indextext = 6;
-      block[0].text = append(block[0].text,abs(degrees(drone.theta))%360);
+      block[start].indextext = 6;
+      block[start].text = append(block[start].text,abs(degrees(drone.theta))%360);
       numofchosenblocks++;
     }
     else {
-      block[0].indextext = 7;
-      block[0].text = append(block[0].text,abs(degrees(drone.theta)%360));
+      block[start].indextext = 7;
+      block[start].text = append(block[start].text,abs(degrees(drone.theta)%360));
       numofchosenblocks++;
     }
     
     //Correcting the y position to y = 0
     if (drone.y < 0) {
-      block[1].indextext = 0;
-      block[1].text = append(block[1].text,abs(drone.y/drone.meter));
+      block[start+1].indextext = 0;
+      block[start+1].text = append(block[start+1].text,abs(drone.y/drone.meter));
       numofchosenblocks++;
     }
     else {
-      block[1].indextext = 1;
-      block[1].text = append(block[1].text,abs(drone.y/drone.meter));
+      block[start+1].indextext = 1;
+      block[start+1].text = append(block[start+1].text,abs(drone.y/drone.meter));
       numofchosenblocks++;
     }
     
     //Correcting the x position to x = 0
     if (drone.x < 0) {
-      block[2].indextext = 2;
-      block[2].text = append(block[2].text,abs(drone.x/drone.meter));
+      block[start+2].indextext = 2;
+      block[start+2].text = append(block[start+2].text,abs(drone.x/drone.meter));
       numofchosenblocks++;
     }
     else {
-      block[2].indextext = 3;
-      block[2].text = append(block[2].text,abs(drone.x/drone.meter));
+      block[start+2].indextext = 3;
+      block[start+2].text = append(block[start+2].text,abs(drone.x/drone.meter));
       numofchosenblocks++;
     }
     
     //Correcting the altitude to z = the minimum height of the drone
     if (drone.z > drone.zmin) {
-      block[3].indextext = 5;
-      block[3].text = append(block[3].text,abs((drone.z-drone.zmin)/drone.meter));
+      block[start+3].indextext = 5;
+      block[start+3].text = append(block[start+3].text,abs((drone.z-drone.zmin)/drone.meter));
       numofchosenblocks++;
     }
     
@@ -181,7 +172,7 @@ class Programming {
   /**************************************************************************************************************************************************
   Visually showing a block defined by a set of placement, size, stroke, fill and text parameters.
   **************************************************************************************************************************************************/
-  void blockDisplay(String a, float x, float y, float l, float w, boolean stroke, color strokecolor, boolean fill, color fillcolor, String text, color textcolor, float textx, float texty, float textsize) {
+  void blockDisplay(String a, float x, float y, float l, float w, boolean stroke, color strokecolor, boolean fill, color fillcolor, String text, color textcolor, float textsize) {
    if (stroke == true) {
      stroke(strokecolor);
    }
@@ -196,6 +187,10 @@ class Programming {
      noFill();
    }
    
+   textAlign(CENTER,CENTER);
+   textSize(textsize);
+   textLeading(textsize);
+   
    if (a == "dynamic") { //The blocks to be programmed
      //rect(x,y,l,w);
      beginShape();
@@ -206,13 +201,25 @@ class Programming {
      vertex(x,y+w);
      vertex(x-l/2,y+w/2);
      endShape(CLOSE);
+     
+     fill(textcolor);
+     text(text,x,y,l,w);
    }
-   else if (a == "index") { //The index blocks to choose from
+   else if (a == "GO" || a == "STOP") { //The index blocks to choose from
      ellipse(x,y,l,w);
+     
+     fill(textcolor);
+     text(text,x,y);
+   }
+   else if (a == "index") {
+     rect(x,y,l,w);
+     
+     fill(textcolor);
+     text(text,x,y,l,w);
    }
    else if (a == "repeat") { //The repeat block which is adding a marker besides it to show the number of blocks within the repeat block.
-     int i = int((y-w)/(1.5*w)); //calculates which place in the object array the repeat block is.
-     float repeatblocklength = (block[i].repeatBlocks)*1.5*w; //Calculates the length if the marker
+     int i = int((y-w)/(1.5*w))+indexblock.length; //calculates which place in the object array the repeat block is.
+     float repeatblocklength = (block[i].repeatBlocks)*1.5*w; //Calculates the length of the marker
      beginShape();
      vertex(x-l/2,y-w);
      vertex(x,y-w/2);
@@ -224,13 +231,10 @@ class Programming {
      vertex(x-l/2-10,y+w/2+repeatblocklength);
      vertex(x-l/2-10,y-w);
      endShape(CLOSE);
+     
+     fill(textcolor);
+     text(text,x,y);
    }
-   
-   textAlign(CENTER,CENTER);
-   fill(textcolor);
-   textSize(textsize);
-   textLeading(textsize);
-   text(text,textx,texty);
  }
   
   
@@ -239,38 +243,16 @@ class Programming {
   It sets a target based on how many frames it has to move and then it moves until the target is reached.
   Then it moves on to the next chosen programming block by increasing the currentblock variable.
   **************************************************************************************************************************************************/
-  void blockW(float a, boolean repeat) {
+  void block(int i, float a, boolean repeat) {
     if (setTarget == true) {
-      setTarget = false;
-      frametarget = float(frameCount)+a*drone.meter/drone.hspeed;
-    }
-    else if (float(frameCount) <= frametarget) {
-      drone.keyW = true;
-    }
-    else {
-      drone.keyW = false;
-      setTarget = true;
-      
-      repeatindex++;
-      if (repeatindex > itemsInRepeat && repeattimesindex == repeatTimes && repeat == true) {//If the block is within a repeat block then it wont move on the the next block unless
-        currentblock++; //The repeat block has repeated the amount of times it should.
-      }
-      else if (repeat == false) {
-        currentblock++;
-      }
-    }
-  }
-  
-  void blockS(float a, boolean repeat) {
-    if (setTarget == true) {
-      frametarget = float(frameCount)+a*drone.meter/drone.hspeed;
+      frameTarget(i,a);
       setTarget = false;
     }
     else if (float(frameCount) <= frametarget) {
-      drone.keyS = true;
+      drone.keyState(i,true);
     }
     else {
-      drone.keyS = false;
+      drone.keyState(i,false);
       setTarget = true;
       
       repeatindex++;
@@ -283,147 +265,38 @@ class Programming {
     }
   }
   
-  void blockA(float a, boolean repeat) {
-    if (setTarget == true) {
+  void frameTarget(int i, float a) {
+    if (i <= 3) {
       frametarget = float(frameCount)+a*drone.meter/drone.hspeed;
-      setTarget = false;
     }
-    else if (float(frameCount) <= frametarget) {
-      drone.keyA = true;
-    }
-    else {
-      drone.keyA = false;
-      setTarget = true;
-      
-      repeatindex++;
-      if (repeatindex > itemsInRepeat && repeattimesindex == repeatTimes && repeat == true) {
-        currentblock++;
-      }
-      else if (repeat == false) {
-        currentblock++;
-      }
-    }
-  }
-  
-  void blockD(float a, boolean repeat) {
-    if (setTarget == true) {
-      frametarget = float(frameCount)+a*drone.meter/drone.hspeed;
-      setTarget = false;
-    }
-    else if (float(frameCount) <= frametarget) {
-      drone.keyD = true;
-    }
-    else {
-      drone.keyD = false;
-      setTarget = true;
-      
-      repeatindex++;
-      if (repeatindex > itemsInRepeat && repeattimesindex == repeatTimes && repeat == true) {
-        currentblock++;
-      }
-      else if (repeat == false) {
-        currentblock++;
-      }
-    }
-  }
-  
-  void blockUp(float a, boolean repeat) {
-    if (setTarget == true) {
+    else if (i <= 5) {
       frametarget = float(frameCount)+a*drone.meter/drone.vspeed;
       if (drone.z+a*drone.meter >= drone.zmax) {
         frametarget = float(frameCount)+((drone.zmax-drone.z)/drone.vspeed);
       }
-      setTarget = false;
-    }
-    else if (float(frameCount) <= frametarget) {
-      drone.keyUp = true;
-    }
-    else {
-      drone.keyUp = false;
-      setTarget = true;
-      
-      repeatindex++;
-      if (repeatindex > itemsInRepeat && repeattimesindex == repeatTimes && repeat == true) {
-        currentblock++;
-      }
-      else if (repeat == false) {
-        currentblock++;
+      if (drone.z+a*drone.meter <= drone.zmin) {
+       frametarget = float(frameCount)+((drone.z-drone.zmin)/drone.vspeed);
       }
     }
-  }
-  
-  void blockDown(float a, boolean repeat) {
-    if (setTarget == true) {
-      frametarget = float(frameCount)+a*drone.meter/drone.vspeed;
-      if (drone.z-a*drone.meter <= drone.zmin) {
-        frametarget = float(frameCount)+abs((drone.zmin-drone.z)/drone.vspeed);
-      }
-      setTarget = false;
-    }
-    else if (float(frameCount) <= frametarget) {
-      drone.keyDown = true;
-    }
-    else {
-      drone.keyDown = false;
-      setTarget = true;
-      
-      repeatindex++;
-      if (repeatindex > itemsInRepeat && repeattimesindex == repeatTimes && repeat == true) {
-        currentblock++;
-      }
-      else if (repeat == false) {
-        currentblock++;
-      }
-    }
-  }
-  
-  void blockYl(float a, boolean repeat) {
-    if (setTarget == true) {
+    else if (i <= 7) {
+      a = a%360;
       frametarget = float(frameCount)+radians(a)/drone.thetaspeed;
-      setTarget = false;
-    }
-    else if (float(frameCount) <= frametarget) {
-      drone.keyLeft = true;
-    }
-    else {
-      drone.keyLeft = false;
-      setTarget = true;
-      
-      repeatindex++;
-      if (repeatindex > itemsInRepeat && repeattimesindex == repeatTimes && repeat == true) {
-        currentblock++;
-      }
-      else if (repeat == false) {
-        currentblock++;
-      }
     }
   }
   
-  void blockYr(float a, boolean repeat) {
-    if (setTarget == true) {
-      frametarget = float(frameCount)+radians(a)/drone.thetaspeed;
-      setTarget = false;
-    }
-    else if (float(frameCount) <= frametarget) {
-      drone.keyRight = true;
-    }
-    else {
-      drone.keyRight = false;
-      setTarget = true;
-      
-      repeatindex++;
-      if (repeatindex > itemsInRepeat && repeattimesindex == repeatTimes-1 && repeat == true) {
-        currentblock++;
-      }
-      else if (repeat == false) {
-        currentblock++;
-      }
-    }
-  }
-  
+  /**************************************************************************************************************************************************
+  First it's skipped if it's set to repeat 0 times.
+  Then it resets parameters.
+  Then it checks if it's valid to perform a new action, if it is the action is performed from performProgramming().
+  If it's not valid because the number of actions has overseeded what's allowed then the repeatindex resets and the repeattimesindex adds 1.
+  When the repeattimesindex is the number of times it should be repeated the repeat block stops and currentblock adds 1.
+  **************************************************************************************************************************************************/
   void blockRepeat(int repeatTimesin, int itemsInRepeatin, int repeatBlockId) {
     repeatTimes = repeatTimesin;
     itemsInRepeat = itemsInRepeatin;
+    if (repeatTimes == 0) { //Making sure that the repeat block is skipped if it's set to repeat 0 times
+      currentblock += itemsInRepeat+1;
+    }
     if (setRepeat == true) { //Initiates the repeat parameters.
       repeatindex = 1;
       repeattimesindex = 1;
@@ -441,6 +314,36 @@ class Programming {
     else if (repeattimesindex == repeatTimes) { //If the blocks has been repeated the amount of times it should be repeated then the repeat block will stop and the blocks will be run as normal
       currentblock = repeatBlockId+1;
       setRepeat = true;
+    }
+  }
+  
+  void blockHSpeed(float a, boolean repeat) {
+    drone.hSpeedParameter = a;
+    if (repeatindex > itemsInRepeat && repeattimesindex == repeatTimes && repeat == true) {
+      currentblock++;
+    }
+    else if (repeat == false) {
+      currentblock++;
+    }
+  }
+  
+  void blockVSpeed(float a, boolean repeat) {
+    drone.vSpeedParameter = a;
+    if (repeatindex > itemsInRepeat && repeattimesindex == repeatTimes && repeat == true) {
+      currentblock++;
+    }
+    else if (repeat == false) {
+      currentblock++;
+    }
+  }
+  
+  void blockThetaSpeed(float a, boolean repeat) {
+    drone.thetaSpeedParameter = a;
+    if (repeatindex > itemsInRepeat && repeattimesindex == repeatTimes && repeat == true) {
+      currentblock++;
+    }
+    else if (repeat == false) {
+      currentblock++;
     }
   }
 }

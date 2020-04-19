@@ -6,12 +6,11 @@ Programmering C
 Eksamensprojekt
 **/
 
-import peasy.*;
-
 float cameraangle = PI/2-PI/8;
 
 
 //Global variables DO NOT TOUCH!
+import peasy.*;
 PeasyCam cam;
 
 Drone drone = new Drone();
@@ -20,30 +19,33 @@ Programming programming = new Programming();
 Block[] block = new Block[100];
 
 float cameradrag = 0;
-boolean programmingb = true;
-float programming_movex;
+boolean programmingShow = true;
+float programmingMovex;
 
 int numofchosenblocks = 0;
 int blockpressed = 0;
 
 boolean colision = false;
 
+float framerate = 60;
+
 
 void setup() {
   fullScreen(P3D);
-  if (programmingb == true) {
-    programming_movex = (width-height)/2;
+  if (programmingShow == true) {
+    programmingMovex = (width-height)/2;
   }
   else {
-    programming_movex = 0;
+    programmingMovex = 0;
   }
   
   rectMode(CENTER);
   ellipseMode(RADIUS);
   imageMode(CENTER);
   shapeMode(CENTER);
-  textMode(MODEL);
   colorMode(RGB,255,255,255,100);
+  frameRate(framerate);
+  
   drone.drone = loadShape("Drone.obj");
   
   for (int i = 0; i < object.length; i++) {
@@ -53,7 +55,7 @@ void setup() {
     block[i] = new Block();
   }
   
-  cam = new PeasyCam(this,width/2-programming_movex,height/2,(height/2)/tan(PI/6),50); //Note with PeasyCam the camera orientation can be moved and you can zoom in and out.
+  cam = new PeasyCam(this,width/2-programmingMovex,height/2,(height/2)/tan(PI/6),50); //Note with PeasyCam the camera orientation can be moved and you can zoom in and out.
   cam.setSuppressRollRotationMode(); //Camera can only be Yawed and Pitched for a more controlled camera movement.
   cam.setMinimumDistance(0);
   cam.setMaximumDistance(2000);
@@ -68,9 +70,13 @@ void draw() {
   drone.display();
   landscape();
   
+  /**
+  hint(DISABLE_DEPTH_TEST);
+  hint(ENABLE_DEPTH_TEST);
+  **/
   cam.beginHUD(); //Creating a 2D HUD on top of the 3D render
   drone.info();
-  if (programmingb == true) {
+  if (programmingShow == true) {
     programming.display();
   }
   cam.endHUD();
@@ -98,9 +104,9 @@ void landscape() {
   
   object[0].sun(drone.meter*20,10,drone.meter/2);
   object[1].base(20*drone.meter);
-  object[2].obstical(2*drone.meter,2*drone.meter,drone.meter/2,drone.meter/2,drone.meter);
-  object[3].obstical(0*drone.meter,5*drone.meter,2*drone.meter,2*drone.meter,2*drone.meter);
-  object[4].obstical(-5*drone.meter,1*drone.meter,1*drone.meter,8*drone.meter,1*drone.meter);
+  object[2].obstical(-2*drone.meter,-2*drone.meter,drone.meter/2,drone.meter/2,drone.meter);
+  object[3].obstical(0*drone.meter,-5*drone.meter,2*drone.meter,2*drone.meter,2*drone.meter);
+  object[4].obstical(5*drone.meter,-1*drone.meter,1*drone.meter,8*drone.meter,1*drone.meter);
   
   rotateZ(-cameradrag);
   rotateZ(-drone.theta);
@@ -207,7 +213,7 @@ void mouseClicked() {
   
   //Clicking STOP
   if (sq(programming.xstop-mouseX)+sq(programming.ystop-mouseY) <= sq(programming.rstop)) {
-    programming.currentblock = numofchosenblocks+programming.indexblock.length;
+    programming.currentBlock = numofchosenblocks+programming.indexblock.length;
   }
   
   //Clicking on a chosen block from the number 0'th to the number of chosen blocks

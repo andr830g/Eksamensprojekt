@@ -3,21 +3,19 @@ class Block {
   float y;
   float len;
   float wid;
-  float space;
   int textsize;
-  color a;
+  color stroke;
   float[] text = new float[0];
   float value;
   
   int indextext;
-  String[] indexunit = {"m","m","m","m","m","m","deg","deg","","m/s","m/s","rad/s"};
+  String[] indexunit = {"m","m","m","m","m","m","deg","deg","","m/s","m/s","deg/s"};
   
   int repeatTimes;
   int repeatBlocks;
   
   
   Block() {
-    space = 5;
     textsize = 16;
   }
   
@@ -28,11 +26,9 @@ class Block {
   **************************************************************************************************************************************************/
   void displayChosen(int iin) {
     int i = iin-programming.indexblock.length;
-    x = programming_movex;
+    x = programmingMovex;
     wid = 40;
     len = 3*wid;
-    
-    //Choosing the y-position
     y = wid+i*1.5*wid;
     
     if (indextext == 8) {
@@ -75,19 +71,19 @@ class Block {
     String joinedTextdisplay = join(textdisplay,"\n"); //"\n” is short for new line
     
     //Determining the stroke color by checking if the block is performed or not.
-    if (programming.perform == true && programming.currentblock-programming.indexblock.length == i) {
-      a = color(255,255,255,100);
+    if (programming.perform == true && programming.currentBlock-programming.indexblock.length == i) {
+      stroke = color(255,255,255,100);
     }
     else {
-      a = color(155,155,155,100);
+      stroke = color(155,155,155,100);
     }
     
     //Displaying the block
     if (indextext == 8) {
-      programming.blockDisplay("repeat",x,y,len,wid,true,a,false,color(0),joinedTextdisplay,color(255,255,255,100),textsize);
+      programming.blockDisplay("repeat",x,y,len,wid,true,stroke,false,color(0),joinedTextdisplay,color(255,255,255,100),textsize);
     }
     else {
-      programming.blockDisplay("dynamic",x,y,len,wid,true,a,false,color(0),joinedTextdisplay,color(255,255,255,100),textsize);
+      programming.blockDisplay("dynamic",x,y,len,wid,true,stroke,false,color(0),joinedTextdisplay,color(255,255,255,100),textsize);
     }
   }
   

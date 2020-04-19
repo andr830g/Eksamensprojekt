@@ -7,7 +7,7 @@ class Drone {
   float zmin;
   float zmax;
   float scale;
-   
+  
   float theta;
   float hspeed;
   float vspeed;
@@ -25,10 +25,10 @@ class Drone {
   boolean keyS;
   boolean keyD;
   boolean keyW;
-  boolean keyLeft;
   boolean keyDown;
-  boolean keyRight;
   boolean keyUp;
+  boolean keyLeft;
+  boolean keyRight;
   
   float meter;
   
@@ -46,7 +46,7 @@ class Drone {
     
     hSpeedParameter = 2;
     vSpeedParameter = 1;
-    thetaSpeedParameter = 1;
+    thetaSpeedParameter = 60;
     
     scale = 2;
   }
@@ -72,11 +72,6 @@ class Drone {
     
     rotateX(-cameraangle-PI/2);
     translate(-width/2,-height/2,0);
-    /**
-    hint(DISABLE_DEPTH_TEST);
-    info();
-    hint(ENABLE_DEPTH_TEST);
-    **/
   }
   
   void droneship() {
@@ -91,16 +86,17 @@ class Drone {
   /**************************************************************************************************************************************************
   Velocities are set.
   If any movement is true then the drone is tilted and the x,y,z coordinates of the drone are changes.
+  Notice that the y-axis is invertede due to the computers definition. This means that a forward move is equivalent to the "backward" function.
   **************************************************************************************************************************************************/
   void move() {
-    hspeed = hSpeedParameter*meter/60;
-    vspeed = vSpeedParameter*meter/60;
-    thetaspeed = thetaSpeedParameter*radians(1);
+    hspeed = hSpeedParameter*meter/framerate;
+    vspeed = vSpeedParameter*meter/framerate;
+    thetaspeed = radians(thetaSpeedParameter/framerate);
     
     //Left
     if (keyA == true) { //a 65
-      x+=hspeed*cos(theta);
-      y-=hspeed*sin(theta);
+      x-=hspeed*cos(theta);
+      y+=hspeed*sin(theta);
       if (rotationZ > -tiltangle) { //Tilting the drone slowly until the tiltangle has been reached.
         rotationZ -= tiltspeed;
       }
@@ -111,8 +107,8 @@ class Drone {
     
     //Right
     if (keyD == true) { //d 68
-      x-=hspeed*cos(theta);
-      y+=hspeed*sin(theta);
+      x+=hspeed*cos(theta);
+      y-=hspeed*sin(theta);
       if (rotationZ < tiltangle) {
         rotationZ += tiltspeed;
       }
@@ -123,8 +119,8 @@ class Drone {
     
     //Backwards
     if (keyS == true) { //s 83
-      y-=hspeed*cos(theta);
-      x-=hspeed*sin(theta);
+      y+=hspeed*cos(theta);
+      x+=hspeed*sin(theta);
       if (rotationX > -tiltangle) {
         rotationX -= tiltspeed;
       }
@@ -135,9 +131,8 @@ class Drone {
     
     //Forwards
     if (keyW == true) { //w 87
-      y+=hspeed*cos(theta);
-      x+=hspeed*sin(theta);
-      //rotationX = PI/8;
+      y-=hspeed*cos(theta);
+      x-=hspeed*sin(theta);
       if (rotationX < tiltangle) {
         rotationX += tiltspeed;
       }
@@ -149,11 +144,17 @@ class Drone {
     //Yaw left
     if (keyLeft == true) {
       theta+=thetaspeed;
+      if (theta >= 2*PI) {
+        theta = 0;
+      }
     }
     
     //Yaw right
     if (keyRight == true) {
       theta-=thetaspeed;
+      if (theta < 0) {
+        theta = 2*PI;
+      }
     }
     
     //Up
@@ -170,18 +171,18 @@ class Drone {
   
   void info() {
     textAlign(LEFT,CENTER);
-    float textx = 20+2*programming_movex;
+    float textx = 20+2*programmingMovex;
     float texty = 0;
     float textsize = 20;
     fill(255,255,255,100);
     textSize(textsize);
     text("Altitude: "+nf(abs((z-scale*drone.height)/meter),1,1)+"m",textx,texty+2*textsize);
-    text("X-Coordinate: "+nf(x/meter,1,1),textx,texty+3*textsize);
-    text("Y-Coordinate: "+nf(y/meter,1,1),textx,texty+4*textsize);
-    text("Orientation: "+nf(abs(degrees(theta))%360,1,1),textx,texty+5*textsize);
-    text("Horizontal Speed: "+(hspeed*60/meter)+"m/s",textx,texty+6*textsize);
-    text("Vertical Speed: "+(vspeed*60/meter)+"m/s",textx,texty+7*textsize);
-    text("Theta Speed: "+(thetaspeed/radians(1))+"rad/s",textx,texty+8*textsize);
+    text("X-Coordinate: "+nf(x/meter,1,1)+"m",textx,texty+3*textsize);
+    text("Y-Coordinate: "+nf(y/meter,1,1)+"m",textx,texty+4*textsize);
+    text("Orientation: "+nf(abs(degrees(theta))%360,1,1)+"deg",textx,texty+5*textsize);
+    text("Horizontal Speed: "+(hspeed*framerate/meter)+"m/s",textx,texty+6*textsize);
+    text("Vertical Speed: "+(vspeed*framerate/meter)+"m/s",textx,texty+7*textsize);
+    text("Theta Speed: "+(round(degrees(thetaspeed*framerate)))+"deg/s",textx,texty+8*textsize);
   }
   
   

@@ -17,14 +17,17 @@ class Object {
   Then a large surface is defined and is set to reflect some light.
   **************************************************************************************************************************************************/
   void base(float w) {
+    float translatex = -drone.x;
+    float translatey = -drone.y;
+    float translatez = -drone.z;
     fill(0,150,0,100);
     noStroke();
-    translate(drone.x,drone.y,-drone.z);
+    translate(translatex,translatey,translatez);
     beginShape();
     shininess(0.3);
     rect(0,0,w,w);
     endShape();
-    translate(-drone.x,-drone.y,drone.z);
+    translate(-translatex,-translatey,-translatez);
   }
   
   
@@ -38,14 +41,17 @@ class Object {
     obsl = l;
     obsw = w;
     obsh = h;
+    float translatex = obsx-drone.x;
+    float translatey = obsy-drone.y;
+    float translatez = obsh/2-drone.z;
     fill(155,155,155,100);
     noStroke();
-    translate(-obsx+drone.x,-obsy+drone.y,-drone.z+obsh/2);
+    translate(translatex,translatey,translatez);
     beginShape();
     shininess(0.5);
     box(obsl,obsw,obsh);
     endShape();
-    translate(obsx-drone.x,obsy-drone.y,drone.z-obsh/2);
+    translate(-translatex,-translatey,-translatez);
   }
   
   
@@ -57,8 +63,11 @@ class Object {
     suntheta-=2*PI/(360*cyclespeed);
     float y = dist*cos(-suntheta);
     float z = dist*sin(-suntheta);
+    float translatex = -drone.x;
+    float translatey = y-drone.y;
+    float translatez = z-drone.z;
     rotateZ(PI/3);
-    translate(drone.x,-y+drone.y,z-drone.z);
+    translate(translatex,translatey,translatez);
     spotLight(245,245,80,0,0,0,0,cos(suntheta),sin(suntheta),-suntheta,4);
     fill(245,245,45,100);
     noStroke();
@@ -66,7 +75,7 @@ class Object {
     shininess(1);
     sphere(r);
     endShape();
-    translate(-drone.x,y-drone.y,-z+drone.z);
+    translate(-translatex,-translatey,-translatez);
     rotateZ(-PI/3);
   }
 }

@@ -54,7 +54,16 @@ class Block {
       unit = new String[4];
       unit[0] = nf(repeatBlocks,1,0); //converts the number of blocks to be repeated to a number at least with 1 digit.
       unit[1] = " blocks ";
-      unit[2] = nf(repeatTimes,1,0); //converts the number of times to be repeated to a number with at least 1 digit.
+      if (programming.perform == true && block[programming.currentBlock].indextext == 8 && programming.currentBlock-programming.indexblock.length == i) {
+        //Checking if the current block being performed is a repeat block
+        String[] dynamicTimes = new String[2];
+        dynamicTimes[0] = nf(programming.repeatTimesIndex,1,0);
+        dynamicTimes[1] = "/"+repeatTimes;
+        unit[2] = join(dynamicTimes,""); //Shows the amount of times it has been repeated / the amount of times it should be repeated
+      }
+      else {
+        unit[2] = nf(repeatTimes,1,0); //converts the number of times to be repeated to a number with at least 1 digit.
+      }
       unit[3] = " times";
     }
     else {
@@ -72,6 +81,10 @@ class Block {
     
     //Determining the stroke color by checking if the block is performed or not.
     if (programming.perform == true && programming.currentBlock-programming.indexblock.length == i) {
+      stroke = color(255,255,255,100);
+    }
+    else if (programming.perform == true && block[programming.currentBlock].indextext == 8 && programming.currentBlock+programming.repeatIndex-programming.indexblock.length == i) {
+      //checking if this is the block that is being repeated because then the stroke color is changed.
       stroke = color(255,255,255,100);
     }
     else {

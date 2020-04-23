@@ -60,7 +60,7 @@ class Object {
   A sphere (the sun) is drawn and a spotlight is set to add light from the direction of the sun.
   **************************************************************************************************************************************************/
   void sun(float dist, float cyclespeed, float r) {
-    suntheta-=2*PI/(360*cyclespeed);
+    suntheta-=radians(1/cyclespeed);
     float y = dist*cos(-suntheta);
     float z = dist*sin(-suntheta);
     float translatex = -drone.x;

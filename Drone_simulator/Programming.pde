@@ -249,7 +249,7 @@ class Programming {
       setTarget = true;
       
       repeatIndex++;
-      if (repeatIndex > itemsInRepeat && repeatTimesIndex == repeatTimes && repeat == true) {
+      if (repeatIndex > itemsInRepeat && repeatTimesIndex > repeatTimes && repeat == true) {
         currentBlock++;
       }
       else if (repeat == false) {
@@ -296,16 +296,16 @@ class Programming {
       setRepeat = false;
     }
     
-    if (repeatIndex <= itemsInRepeat && repeatTimesIndex < repeatTimes) { //A block will be performed if the block that has to be performed isn't larger than the amount of blocks to be repeated.
+    if (repeatIndex <= itemsInRepeat && repeatTimesIndex <= repeatTimes) { //A block will be performed if the block that has to be performed isn't larger than the amount of blocks to be repeated.
       int a = repeatBlockId+repeatIndex; //And the amount of times the blocks has been repeated isn't larger than the amount of times they should be repeated.
       performProgramming(a,true);
     }
-    else if (repeatTimesIndex < repeatTimes) { //The amount of times it has been repeated adds 1 and the block to be repeated starts over from 1
+    else if (repeatTimesIndex <= repeatTimes) { //The amount of times it has been repeated adds 1 and the block to be repeated starts over from 1
       repeatIndex = 1;
       repeatTimesIndex++;
     }
-    else if (repeatTimesIndex == repeatTimes) { //If the blocks has been repeated the amount of times it should be repeated then the repeat block will stop and the blocks will be run as normal
-      currentBlock = repeatBlockId+1;
+    else if (repeatTimesIndex > repeatTimes) { //If the blocks has been repeated the amount of times it should be repeated then the repeat block will stop and the blocks will be run as normal
+      currentBlock = repeatBlockId+itemsInRepeat+1;
       setRepeat = true;
     }
   }
@@ -323,7 +323,7 @@ class Programming {
     else if (indexblock[i] == "THETASPEED") {
       drone.thetaSpeedParameter = a;
     }
-    if (repeatIndex > itemsInRepeat && repeatTimesIndex == repeatTimes && repeat == true) {
+    if (repeatIndex > itemsInRepeat && repeatTimesIndex > repeatTimes && repeat == true) {
       currentBlock++;
     }
     else if (repeat == false) {

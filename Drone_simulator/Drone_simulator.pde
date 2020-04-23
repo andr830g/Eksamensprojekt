@@ -72,6 +72,10 @@ void draw() {
   
   /**
   hint(DISABLE_DEPTH_TEST);
+  drone.info();
+  if (programmingShow == true) {
+    programming.display();
+  }
   hint(ENABLE_DEPTH_TEST);
   **/
   cam.beginHUD(); //Creating a 2D HUD on top of the 3D render
